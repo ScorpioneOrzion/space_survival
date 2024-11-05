@@ -7,8 +7,8 @@
     "start": "vinxi start"
   },
   "dependencies": {
+    "@solidjs/router": "^0.15.0",
     "@solidjs/start": "^1.0.10",
-    "konva": "^9.3.16",
     "solid-js": "^1.9.2",
     "vinxi": "^0.4.3"
   },
