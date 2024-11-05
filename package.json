@@ -1,0 +1,18 @@
+{
+  "name": "space_survival",
+  "type": "module",
+  "scripts": {
+    "dev": "vinxi dev",
+    "build": "vinxi build",
+    "start": "vinxi start"
+  },
+  "dependencies": {
+    "@solidjs/start": "^1.0.10",
+    "konva": "^9.3.16",
+    "solid-js": "^1.9.2",
+    "vinxi": "^0.4.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
