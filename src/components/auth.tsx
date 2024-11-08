@@ -9,13 +9,12 @@ export default function () {
 
 	async function checkLoginStatus() {
 		try {
-			const status = await isLoggedIn(); // Call to check if the user is logged in
+			const status = await isLoggedIn();
 			setLoggedIn(status);
 			setErrorMessage('');
 		} catch (error) {
 			console.error("Error checking login status:", error);
-			// Optionally show a fallback or error message
-			setLoggedIn(false); // Default to logged out state in case of error
+			setLoggedIn(false);
 		}
 	}
 
