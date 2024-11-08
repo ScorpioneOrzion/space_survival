@@ -11,6 +11,7 @@ export default function () {
 		try {
 			const status = await isLoggedIn(); // Call to check if the user is logged in
 			setLoggedIn(status);
+			setErrorMessage('');
 		} catch (error) {
 			console.error("Error checking login status:", error);
 			// Optionally show a fallback or error message
