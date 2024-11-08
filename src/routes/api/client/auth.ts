@@ -12,9 +12,8 @@ async function isLoggedInServer() {
 	"use server"
 	try {
 		const sessionData = await session();
-		return sessionData.data.userId != null; // Checks for null and undefined
+		return typeof sessionData.data.userId === 'number';
 	} catch (error) {
-		console.error("Error checking session:", error);
 		return false;
 	}
 }
