@@ -1,5 +1,6 @@
 import { MetaProvider, Title } from "@solidjs/meta";
-import { getUser } from "./api/client/admin";
+import Auth from "~/components/auth";
+import replacer from "~/helper/replacer";
 
 export default function () {
 	return (
@@ -7,7 +8,7 @@ export default function () {
 			<MetaProvider>
 				<Title>Login</Title>
 			</MetaProvider>
-			<button type="button" title="test" onclick={getUser}>getUser</button>
+			<Auth></Auth>
 		</>
 	)
 }

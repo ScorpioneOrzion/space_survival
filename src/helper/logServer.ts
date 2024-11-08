@@ -1,4 +1,4 @@
-const replacer = (key: string, value: unknown) => { if (typeof value === 'bigint') { return value.toString() + 'n'; } return value; };
+import replacer from "./replacer"
 
 export default function (message: any) {
 	"use server"

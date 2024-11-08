@@ -3,7 +3,42 @@ import { randomBytes, pbkdf2Sync } from 'crypto';
 import fs from 'fs';
 
 const db = new Database(process.env.DATABASE_PATH!)
-const sql = fs.readFileSync(new URL('./db.sql', import.meta.url), 'utf-8')
+const sql = fs.readFileSync(new URL('./db.sql', import.meta.url), 'utf-8');
+
+function isUser(obj: any): obj is USER {
+	return (
+		typeof obj === 'object' &&
+		obj !== null &&
+		'id' in obj &&
+		'username' in obj &&
+		'password_hash' in obj &&
+		'salt' in obj &&
+		'email' in obj &&
+		typeof obj.id === 'number' &&
+		typeof obj.username === 'string' &&
+		typeof obj.password_hash === 'string' &&
+		typeof obj.salt === 'string' &&
+		typeof obj.email === 'string'
+	);
+}
+
+function isId(obj: any): obj is IDCount {
+	return (
+		typeof obj === 'object' &&
+		obj !== null &&
+		'maxId' in obj &&
+		typeof obj.maxId === 'number'
+	)
+}
+
+function isIdEmpty(obj: any): obj is { maxId: null } {
+	return (
+		typeof obj === 'object' &&
+		obj !== null &&
+		'maxId' in obj &&
+		obj.maxId === null
+	)
+}
 
 const sqlCommands: Record<string, string> = {}
 const sqlParts = sql.split(/--[^\n]*/).filter(Boolean)
@@ -30,7 +65,23 @@ export function verifyPassword(password: string, salt: string, hash: string) {
 	return hash === derivedHash;
 }
 
-export function addUser(id: string, userName: string, plainPassword: string, email: string) {
+export async function generateUserId() {
+	const query = sqlCommands['GET_MAX_ID'];
+	const stmt = db.prepare(query);
+	const result = stmt.get();
+	console.debug('Generated UserId result:', result);
+	if (isId(result)) {
+		return { success: true, id: result.maxId + 1 }
+	}
+	if (isIdEmpty(result)) {
+		return { success: true, id: 1 }
+	}
+	return {
+		success: false, id: -1
+	}
+}
+
+export function addUser(id: number, userName: string, plainPassword: string, email: string) {
 	const query = sqlCommands['ADD_USER'];
 	try {
 		const stmt = db.prepare(query);
@@ -44,15 +95,27 @@ export function addUser(id: string, userName: string, plainPassword: string, ema
 	}
 }
 
-export function getUser(id: string) {
-	const query = sqlCommands['GET_USER'];
+export function getUserName(userName: string) {
+	const query = sqlCommands['GET_USER_NAME'];
+	try {
+		const stmt = db.prepare(query);
+		const user = stmt.get(userName);
+		if (isUser(user)) return { success: true, data: user };
+		return { success: false, error: 'User not found' };
+	} catch (error) {
+		console.error('Error getting user:', error);
+		if (typeof error === 'object' && error !== null && 'message' in error)
+			return { success: false, error: error.message };
+	}
+}
+
+export function getUserId(id: number) {
+	const query = sqlCommands['GET_USER_ID'];
 	try {
 		const stmt = db.prepare(query);
 		const user = stmt.get(id);
-		if (!user) {
-			return { success: false, error: 'User not found' };
-		}
-		return { success: true, data: user };
+		if (isUser(user)) return { success: true, data: user };
+		return { success: false, error: 'User not found' };
 	} catch (error) {
 		console.error('Error getting user:', error);
 		if (typeof error === 'object' && error !== null && 'message' in error)
