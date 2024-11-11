@@ -12,8 +12,10 @@ export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => 
 	}
 
 	return (
-		<form onSubmit={handleLogoutSubmit}>
-			<button type="submit">Log Out</button>
+		<form onSubmit={handleLogoutSubmit} class={'auth'}>
+			<div class={"form-group"}>
+				<input type="submit" value={'Log Out'} />
+			</div>
 		</form>
 	)
 }

@@ -4,7 +4,9 @@ body {
 	height: 100vh;
 	overflow: hidden;
 }
-.full, #app {
+
+.full,
+#app {
 	width: 100%;
 	height: 100%;
 }

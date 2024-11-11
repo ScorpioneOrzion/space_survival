@@ -1,7 +1,8 @@
 import isHTMLElement from "~/helper/isHTMLElement";
 import createHTMLSignal from "~/helper/createHTMLSignal";
 import { register } from "~/routes/api/client/auth";
-import isSuccess  from "~/helper/isSuccess";
+import isSuccess from "~/helper/isSuccess";
+import DisplayPassword from "./displayPassword";
 
 export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => Promise<void>, setErrorMessage: (msg: string) => void }) {
 	const [userNameElem, setUserNameElem] = createHTMLSignal<HTMLInputElement>();
@@ -51,40 +52,41 @@ export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => 
 	}
 
 	return (
-		<form onSubmit={handleRegisterSubmit}>
-			<input
-				type="text"
-				title="username"
-				ref={setUserNameElem}
-				placeholder="Username"
-				autocomplete="username"
-				required
-			/>
-			<input
-				type="text"
-				title="email"
-				ref={setEmailElem}
-				placeholder="Email"
-				autocomplete="email"
-				required
-			/>
-			<input
-				type="password"
+		<form onSubmit={handleRegisterSubmit} class={'auth'}>
+			<div class={"form-group"}>
+				<input
+					type="text"
+					title="username"
+					ref={setUserNameElem}
+					placeholder="Username"
+					autocomplete="username"
+					required
+				/>
+			</div>
+			<div class={"form-group"}>
+				<input
+					type="email"
+					title="email"
+					ref={setEmailElem}
+					placeholder="Email"
+					required
+				/>
+			</div>
+			<DisplayPassword
 				title="create password"
 				ref={setPassWordElem}
 				placeholder="Create password"
-				autocomplete="new-password"
-				required
+				current={false}
 			/>
-			<input
-				type="password"
+			<DisplayPassword
 				title="confirm password"
 				ref={setPassWordConfirmElem}
 				placeholder="Confirm password"
-				autocomplete="new-password"
-				required
+				current={false}
 			/>
-			<button type="submit">Register</button>
+			<div class={"form-group"}>
+				<input type="submit" value={'Register'} />
+			</div>
 		</form>
 	)
 }

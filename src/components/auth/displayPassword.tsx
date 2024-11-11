@@ -1,6 +1,9 @@
-import { createSignal } from 'solid-js';
+import { createSignal, Show } from 'solid-js';
 
-export default function ({ placeholder }: { placeholder: string }) {
+type refType<T extends HTMLElement> = ReturnType<typeof createSignal<T | null>>['1']
+
+export default function <T extends HTMLElement>({ placeholder, title, current, ref }:
+	{ placeholder: string, title: string, current: boolean, ref: refType<T> }) {
 	const [showPassword, setShowPassword] = createSignal(false); // Track password visibility
 
 	// Function to toggle password visibility
@@ -9,15 +12,28 @@ export default function ({ placeholder }: { placeholder: string }) {
 	};
 
 	return (
-		<div class={"password-container"}>
-			<input
-				type={showPassword() ? "text" : "password"} // Toggle between text and password
+		<div class={"password-container form-group" }>
+			{current ? <input
+				type={showPassword() ? "text" : "password"}
 				placeholder={placeholder}
 				class={"password-input"}
-			/>
+				title={title}
+				autocomplete='current-password'
+				required
+				ref={ref}
+			/> : <input
+				type={showPassword() ? "text" : "password"}
+				placeholder={placeholder}
+				class={"password-input"}
+				title={title}
+				autocomplete='new-password'
+				ref={ref}
+				required
+			/>}
 			<button
 				class={"toggle-password"}
 				type="button"
+				title='toggle-password'
 				onClick={togglePasswordVisibility}
 			>
 				{showPassword() ? (

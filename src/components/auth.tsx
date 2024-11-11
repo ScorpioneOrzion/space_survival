@@ -2,10 +2,13 @@ import { createSignal, onMount, Show } from "solid-js";
 import { isLoggedIn } from "~/routes/api/client/auth";
 import Logout from "./auth/logout";
 import LoginRegister from "./auth/login-register";
+import '~/css/auth.css'
+import { useGlobalContext } from "~/context";
 
 export default function () {
-	const [loggedIn, setLoggedIn] = createSignal(false);
+	const [ loggedIn, setLoggedIn] = useGlobalContext().login;
 	const [errorMessage, setErrorMessage] = createSignal("");
+	const ready = useGlobalContext().ready;
 
 	async function checkLoginStatus() {
 		try {
@@ -23,7 +26,7 @@ export default function () {
 	});
 
 	return (
-		<>
+		<Show when={ready()}>
 			{loggedIn() ? (
 				<Logout checkStatus={checkLoginStatus} setErrorMessage={setErrorMessage} />
 			) : (
@@ -35,6 +38,6 @@ export default function () {
 					<p>{errorMessage()}</p>
 				</div>
 			</Show>
-		</>
+		</Show>
 	)
 }

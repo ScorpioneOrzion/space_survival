@@ -2,6 +2,7 @@ import isHTMLElement from "~/helper/isHTMLElement";
 import createHTMLSignal from "~/helper/createHTMLSignal";
 import { login } from "~/routes/api/client/auth";
 import isSuccess from "~/helper/isSuccess";
+import DisplayPassword from "./displayPassword";
 
 export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => Promise<void>, setErrorMessage: (msg: string) => void }) {
 	const [userNameElem, setUserNameElem] = createHTMLSignal<HTMLInputElement>();
@@ -36,24 +37,26 @@ export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => 
 	}
 
 	return (
-		<form onSubmit={handleLoginSubmit}>
-			<input
-				type="text"
-				title="username"
-				ref={setUserNameElem}
-				placeholder="Username"
-				autocomplete="username"
-				required
-			/>
-			<input
-				type="password"
-				title="password"
+		<form onSubmit={handleLoginSubmit} class={'auth'}>
+			<div class={"form-group"}>
+				<input
+					type="text"
+					title="username"
+					ref={setUserNameElem}
+					placeholder="Username"
+					autocomplete="username"
+					required
+				/>
+			</div>
+			<DisplayPassword
 				ref={setPassWordElem}
+				current={true}
+				title="password"
 				placeholder="Password"
-				autocomplete="current-password"
-				required
 			/>
-			<button type="submit">Log In</button>
+			<div class={"form-group"}>
+				<input type="submit" value={'Log In'} />
+			</div>
 		</form>
 	)
 }

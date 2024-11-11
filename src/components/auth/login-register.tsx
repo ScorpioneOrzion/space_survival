@@ -13,12 +13,11 @@ export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => 
 				<Login checkStatus={checkStatus} setErrorMessage={setErrorMessage} />}
 			<p>
 				{register() ? "Already" : "Don't"} have an account?{" "}
-				<button type="button" onClick={() => {
+				<a href="#" class={"toggle-login"} onClick={e => {
+					e.preventDefault()
 					setRegister(!register())
 					setErrorMessage('')
-				}}>
-					{register() ? "Log in" : "Register"}
-				</button>
+				}}>{register() ? "Log in" : "Register"}</a>
 			</p>
 		</>
 	)
