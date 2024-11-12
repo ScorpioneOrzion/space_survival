@@ -52,7 +52,7 @@ export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => 
 	}
 
 	return (
-		<form onSubmit={handleRegisterSubmit} class={'auth'}>
+		<form onSubmit={handleRegisterSubmit} class={'auth register'}>
 			<div class={"form-group"}>
 				<input
 					type="text"

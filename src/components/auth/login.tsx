@@ -37,7 +37,7 @@ export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => 
 	}
 
 	return (
-		<form onSubmit={handleLoginSubmit} class={'auth'}>
+		<form onSubmit={handleLoginSubmit} class={'auth login'}>
 			<div class={"form-group"}>
 				<input
 					type="text"

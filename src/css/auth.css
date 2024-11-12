@@ -1,4 +1,6 @@
 form.auth {
+	width: var(--width);
+
 	div {
 		padding: 0;
 		justify-content: flex-start;
@@ -6,15 +8,15 @@ form.auth {
 		display: flex;
 
 		input {
-			width: 200px;
-			height: 25px;
+			width: var(--width);
+			height: var(--height);
 			padding: 0;
 			margin: 0;
 			box-sizing: border-box;
 		}
 
 		button.toggle-password {
-			height: 25px;
+			height: var(--height);
 			width: 25px;
 			padding: 0;
 			margin: 0;

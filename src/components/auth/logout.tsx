@@ -1,5 +1,3 @@
-import isHTMLElement from "~/helper/isHTMLElement";
-import createHTMLSignal from "~/helper/createHTMLSignal";
 import { logout } from "~/routes/api/client/auth";
 import isSuccess from "~/helper/isSuccess";
 
@@ -12,7 +10,7 @@ export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => 
 	}
 
 	return (
-		<form onSubmit={handleLogoutSubmit} class={'auth'}>
+		<form onSubmit={handleLogoutSubmit} class={'auth logout'}>
 			<div class={"form-group"}>
 				<input type="submit" value={'Log Out'} />
 			</div>

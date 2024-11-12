@@ -3,10 +3,10 @@ import { isLoggedIn } from "~/routes/api/client/auth";
 import Logout from "./auth/logout";
 import LoginRegister from "./auth/login-register";
 import '~/css/auth.css'
-import { useGlobalContext } from "~/context";
+import { useGlobalContext } from '~/global/context';
 
 export default function () {
-	const [ loggedIn, setLoggedIn] = useGlobalContext().login;
+	const [loggedIn, setLoggedIn] = useGlobalContext().login;
 	const [errorMessage, setErrorMessage] = createSignal("");
 	const ready = useGlobalContext().ready;
 
@@ -18,6 +18,7 @@ export default function () {
 		} catch (error) {
 			console.error("Error checking login status:", error);
 			setLoggedIn(false);
+			setErrorMessage("Error checking login status")
 		}
 	}
 
@@ -34,7 +35,7 @@ export default function () {
 			)
 			}
 			<Show when={errorMessage() !== ""}>
-				<div>
+				<div class={"errorMessage"}>
 					<p>{errorMessage()}</p>
 				</div>
 			</Show>

@@ -1,6 +1,6 @@
 import { MetaProvider, Title } from "@solidjs/meta";
 import { createEffect } from "solid-js";
-import { useGlobalContext } from "~/context";
+import { useGlobalContext } from '~/global/context';
 
 export default function () {
 	const { login, ready } = useGlobalContext()

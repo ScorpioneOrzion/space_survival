@@ -12,7 +12,7 @@ export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => 
 				:
 				<Login checkStatus={checkStatus} setErrorMessage={setErrorMessage} />}
 			<p>
-				{register() ? "Already" : "Don't"} have an account?{" "}
+				{register() ? "Already have an account?" : "Don't have an account?"}&emsp;
 				<a href="#" class={"toggle-login"} onClick={e => {
 					e.preventDefault()
 					setRegister(!register())

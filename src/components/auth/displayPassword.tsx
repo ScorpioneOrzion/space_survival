@@ -1,4 +1,4 @@
-import { createSignal, Show } from 'solid-js';
+import { createSignal } from 'solid-js';
 
 type refType<T extends HTMLElement> = ReturnType<typeof createSignal<T | null>>['1']
 
