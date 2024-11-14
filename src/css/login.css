@@ -1,0 +1,44 @@
+div.center {
+	position: relative;
+	height: 100%;
+	width: 100%;
+	font-size: 1rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	div#forum {
+		flex-direction: column;
+	}
+
+	form {
+
+		gap: 10px;
+
+		div.form-group:has(label) {
+			flex-direction: column;
+
+			label#title {
+				font-size: 1.5em;
+				font-weight: bold;
+			}
+
+			margin-bottom: 20px;
+		}
+
+		div.form-group {
+			width: 225px;
+			display: flex;
+
+			input {
+				width: 225px;
+				height: 25px;
+			}
+		}
+	}
+
+	p {
+		position: absolute;
+		bottom: 25vh;
+	}
+}

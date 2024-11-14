@@ -1,5 +1,5 @@
 import { createSignal, onMount, Show } from "solid-js";
-import { isLoggedIn } from "~/routes/api/client/auth";
+import { isLoggedIn } from "~/api/client/auth";
 import Logout from "./auth/logout";
 import LoginRegister from "./auth/login-register";
 import '~/css/auth.css'

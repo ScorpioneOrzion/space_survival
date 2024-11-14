@@ -1,4 +1,4 @@
-import { logout } from "~/routes/api/client/auth";
+import { logout } from "~/api/client/auth";
 import isSuccess from "~/helper/isSuccess";
 
 export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => Promise<void>, setErrorMessage: (msg: string) => void }) {

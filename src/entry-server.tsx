@@ -1,6 +1,6 @@
 // @refresh reload
 import { createHandler, StartServer } from "@solidjs/start/server";
-import { initializeDatabase } from "~/routes/api/server/db";
+import { initializeDatabase } from "~/api/server/db";
 
 initializeDatabase()
 

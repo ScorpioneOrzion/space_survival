@@ -8,7 +8,6 @@ export default function () {
 	return (
 		<header class={'layout'}>
 			<div>
-				<div></div>
 				<button type='button' onClick={() => setAccountVisible(!accountVisible())} >Account</button>
 				<div id='form'>
 					<Show when={accountVisible()}>

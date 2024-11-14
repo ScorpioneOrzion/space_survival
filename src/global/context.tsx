@@ -1,5 +1,5 @@
 import { createContext, createEffect, createSignal, JSX, useContext } from "solid-js";
-import { isLoggedIn } from "~/routes/api/client/auth";
+import { isLoggedIn } from "~/api/client/auth";
 
 const Context = createContext<{
 	login: ReturnType<typeof createSignal<boolean>>

@@ -1,4 +1,4 @@
-import session from "../server/session";
+import session from '../server/session'
 import { addUser, generateUserId, getUserName, verifyPassword } from "../server/db";
 
 function errorResult(err: any): ERRORRESPONSE {
