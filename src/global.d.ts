@@ -1,33 +1,42 @@
 /// <reference types="@solidjs/start/env" />
 
+type LoginProps = {
+	update: () => void
+	setErrorMessage: (msg: string) => void
+}
+
 type UserSession = {
-	userId?: number;
+	userId: number;
 };
 
-type SUCCESSRESPONSE = {
+type CONFIRMRESPONSE = {
+	success: true
+}
+
+type SUCCESSRESPONSE<T> = {
 	success: true;
-	message?: string;
-	data?: unknown;
-	error?: never;
+	data: T;
 }
 
 type ERRORRESPONSE = {
 	success: false;
-	message?: string;
-	data?: never;
 	error: string;
 }
 
-type RESPONSE = SUCCESSRESPONSE | ERRORRESPONSE
+type RESPONSE<T = unknown> = SUCCESSRESPONSE<T> | ERRORRESPONSE
+type CONFIRM = CONFIRMRESPONSE | ERRORRESPONSE
 
 type IDCount = {
 	maxId: number
 }
 
-type USER = {
-	id: number
+type USERACCOUNT = {
 	username: string
-	password_hash: string
-	salt: string
 	email: string
 }
+
+type USER = {
+	id: number
+	password_hash: string
+	salt: string
+} & USERACCOUNT

@@ -1,28 +1,47 @@
 import { createContext, createEffect, createSignal, JSX, useContext } from "solid-js";
 import { isLoggedIn } from "~/api/client/auth";
+import { getUserInfo } from "~/api/client/user";
 
 const Context = createContext<{
-	login: ReturnType<typeof createSignal<boolean>>
+	login: () => boolean
 	ready: () => boolean
+	user: () => USERACCOUNT
+	update: () => void
 }>()
 
 export default function (props: { children: JSX.Element }) {
-	const login = createSignal(false)
-	const ready = createSignal(false)
+	const login = createSignal<boolean>(false);
+	const ready = createSignal<boolean>(false);
+	const user = createSignal<USERACCOUNT>({ username: "", email: "" });
 
-	createEffect(async () => {
+	function reset() {
+		ready[1](false)
+		login[1](false);
+		user[1]({ username: "", email: "" })
+	}
+
+	async function update() {
+		reset()
 		try {
 			const status = await isLoggedIn();
 			login[1](status);
+			if (status) {
+				const userStatus = await getUserInfo()
+				if (userStatus.success) user[1](userStatus.data)
+			}
 		} catch (error) {
 			console.error("Error checking login status:", error);
-			login[1](false);
+			reset()
 		}
 		ready[1](true)
+	}
+
+	createEffect(async () => {
+		update()
 	})
 
 	return (
-		<Context.Provider value={{ login, ready: ready[0] }}>
+		<Context.Provider value={{ login: login[0], ready: ready[0], user: user[0], update }}>
 			{props.children}
 		</Context.Provider>
 	)

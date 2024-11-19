@@ -2,16 +2,13 @@ import isHTMLElement from "~/helper/isHTMLElement";
 import createHTMLSignal from "~/helper/createHTMLSignal";
 import { register } from "~/api/client/auth";
 import isSuccess from "~/helper/isSuccess";
-import DisplayPassword from "./displayPassword";
-import { createSignal, Show } from "solid-js";
-import { Navigate } from "@solidjs/router";
+import DisplayPassword from "../displayPassword";
 
-export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => Promise<void>, setErrorMessage: (msg: string) => void }) {
+export default function ({ update, setErrorMessage }: LoginProps) {
 	const [userNameElem, setUserNameElem] = createHTMLSignal<HTMLInputElement>();
 	const [emailElem, setEmailElem] = createHTMLSignal<HTMLInputElement>();
 	const [passWordElem, setPassWordElem] = createHTMLSignal<HTMLInputElement>();
 	const [passWordConfirmElem, setPassWordConfirmElem] = createHTMLSignal<HTMLInputElement>();
-	const [redirect, setRedirect] = createSignal(false)
 
 	async function handleRegisterSubmit(e: SubmitEvent) {
 		e.preventDefault()
@@ -47,10 +44,7 @@ export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => 
 			formData.append('email', email)
 
 			const response = await register(formData)
-			if (isSuccess(response)) {
-				await checkStatus()
-				setRedirect(true)
-			}
+			if (response.success) update()
 			else setErrorMessage(response.error)
 		} else {
 			setErrorMessage("Invalid elements.");
@@ -58,51 +52,46 @@ export default function ({ checkStatus, setErrorMessage }: { checkStatus: () => 
 	}
 
 	return (
-		<>
-			<form onSubmit={handleRegisterSubmit} class={'auth register'}>
-				<div class={"form-group"}>
-					<label id="title">Register</label>
-					<label>Please enter details to register</label>
-				</div>
-				<div class={"form-group"}>
-					<input
-						type="text"
-						title="username"
-						ref={setUserNameElem}
-						placeholder="Username"
-						autocomplete="username"
-						required
-					/>
-				</div>
-				<div class={"form-group"}>
-					<input
-						type="email"
-						title="email"
-						ref={setEmailElem}
-						placeholder="Email"
-						autocomplete="email"
-						required
-					/>
-				</div>
-				<DisplayPassword
-					title="password"
-					ref={setPassWordElem}
-					placeholder="Password"
-					current={false}
+		<form onSubmit={handleRegisterSubmit} class={'auth register'}>
+			<div class={"form-group"}>
+				<label id="title">Register</label>
+				<label>Please enter details to register</label>
+			</div>
+			<div class={"form-group"}>
+				<input
+					type="text"
+					title="username"
+					ref={setUserNameElem}
+					placeholder="Username"
+					autocomplete="username"
+					required
 				/>
-				<DisplayPassword
-					title="confirm password"
-					ref={setPassWordConfirmElem}
-					placeholder="Confirm password"
-					current={false}
+			</div>
+			<div class={"form-group"}>
+				<input
+					type="email"
+					title="email"
+					ref={setEmailElem}
+					placeholder="Email"
+					autocomplete="email"
+					required
 				/>
-				<div class={"form-group"}>
-					<input type="submit" value={'Register'} />
-				</div>
-			</form>
-			<Show when={redirect()}>
-				<Navigate href={"/"} />
-			</Show>
-		</>
+			</div>
+			<DisplayPassword
+				title="password"
+				ref={setPassWordElem}
+				placeholder="Password"
+				current={false}
+			/>
+			<DisplayPassword
+				title="confirm password"
+				ref={setPassWordConfirmElem}
+				placeholder="Confirm password"
+				current={false}
+			/>
+			<div class={"form-group"}>
+				<input type="submit" value={'Register'} />
+			</div>
+		</form>
 	)
 }

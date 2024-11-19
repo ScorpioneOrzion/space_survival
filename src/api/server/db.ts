@@ -5,7 +5,7 @@ import fs from 'fs';
 const db = new Database(process.env.DATABASE_PATH!)
 const sql = fs.readFileSync(new URL('./db.sql', import.meta.url), 'utf-8');
 
-function isUser(obj: any): obj is USER {
+export function isUser(obj: any): obj is USER {
 	return (
 		typeof obj === 'object' &&
 		obj !== null &&
@@ -81,7 +81,7 @@ export async function generateUserId() {
 	}
 }
 
-export function addUser(id: number, userName: string, plainPassword: string, email: string) {
+export function addUser(id: number, userName: string, plainPassword: string, email: string): CONFIRM {
 	const query = sqlCommands['ADD_USER'];
 	try {
 		const stmt = db.prepare(query);
@@ -90,12 +90,13 @@ export function addUser(id: number, userName: string, plainPassword: string, ema
 		return { success: true };
 	} catch (error) {
 		console.error('Error adding user:', error);
-		if (typeof error === 'object' && error !== null && 'message' in error)
+		if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string')
 			return { success: false, error: error.message };
+		return { success: false, error: "Unknown error" }
 	}
 }
 
-export function getUserName(userName: string) {
+export function getUserName(userName: string): RESPONSE<USER> {
 	const query = sqlCommands['GET_USER_NAME'];
 	try {
 		const stmt = db.prepare(query);
@@ -104,12 +105,13 @@ export function getUserName(userName: string) {
 		return { success: false, error: 'User not found' };
 	} catch (error) {
 		console.error('Error getting user:', error);
-		if (typeof error === 'object' && error !== null && 'message' in error)
+		if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string')
 			return { success: false, error: error.message };
+		return { success: false, error: "Unknown error" }
 	}
 }
 
-export function getUserId(id: number) {
+export function getUserId(id: number): RESPONSE<USER> {
 	const query = sqlCommands['GET_USER_ID'];
 	try {
 		const stmt = db.prepare(query);
@@ -118,8 +120,9 @@ export function getUserId(id: number) {
 		return { success: false, error: 'User not found' };
 	} catch (error) {
 		console.error('Error getting user:', error);
-		if (typeof error === 'object' && error !== null && 'message' in error)
+		if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string')
 			return { success: false, error: error.message };
+		return { success: false, error: "Unknown error" }
 	}
 }
 

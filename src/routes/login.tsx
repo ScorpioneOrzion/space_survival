@@ -1,28 +1,31 @@
-import { createSignal } from "solid-js";
-import { isLoggedIn } from "~/api/client/auth";
-import LoginRegister from "~/components/auth/login-register"
+import { MetaProvider, Title } from "@solidjs/meta";
+import { createMemo, createSignal, Show } from "solid-js";
+import LoginRegister from "~/components/auth/component-auth"
 import '~/css/login.css'
 import { useGlobalContext } from "~/global/context";
+import { Navigate } from "@solidjs/router";
 
 export default function () {
-	const [loggedIn, setLoggedIn] = useGlobalContext().login;
+	const globalContext = useGlobalContext();
+	const { login, ready, update } = globalContext
 	const [errorMessage, setErrorMessage] = createSignal("");
-	const ready = useGlobalContext().ready;
 
-	async function checkLoginStatus() {
-		try {
-			const status = await isLoggedIn();
-			setLoggedIn(status);
-			setErrorMessage('');
-		} catch (error) {
-			console.error("Error checking login status:", error);
-			setLoggedIn(false);
-			setErrorMessage("Error checking login status")
-		}
-	}
+	const shouldRedirect = createMemo(() => ready() && login());
+
 	return (
-		<div class={"center"}>
-			<LoginRegister checkStatus={checkLoginStatus} setErrorMessage={setErrorMessage} />
-		</div>
+		<>
+			<MetaProvider>
+				<Title>Login</Title>
+			</MetaProvider>
+			<div class={"center"}>
+				<LoginRegister update={update} setErrorMessage={setErrorMessage} />
+				<Show when={errorMessage() !== ""}>
+					<div class={"errorMessage"}>
+						<p>{errorMessage()}</p>
+					</div>
+				</Show>
+			</div>
+			<Show when={shouldRedirect()} ><Navigate href={"/"} /></Show>
+		</>
 	)
 }

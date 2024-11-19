@@ -9,6 +9,16 @@ div.center {
 
 	div#forum {
 		flex-direction: column;
+		display: flex;
+	}
+
+	div.errorMessage {
+		position: absolute;
+		bottom: 20vh;
+		&>p {
+			position: relative;
+			bottom: 0;
+		}
 	}
 
 	form {

@@ -1,25 +1,23 @@
 import { createSignal } from "solid-js";
-import Login from "./login";
-import Register from "./register";
+import Login from "./component-login";
+import Register from "./component-register";
 
-export default function LoginRegister({ checkStatus, setErrorMessage }: { checkStatus: () => Promise<void>, setErrorMessage: (msg: string) => void }) {
+export default function LoginRegister({ update, setErrorMessage }: LoginProps) {
 	const [register, setRegister] = createSignal(false);
 
 	return (
 		<>
 			<div id={"forum"}>
 				{register() ?
-					<Register checkStatus={checkStatus} setErrorMessage={setErrorMessage} />
+					<Register update={update} setErrorMessage={setErrorMessage} />
 					:
-					<Login checkStatus={checkStatus} setErrorMessage={setErrorMessage} />}
+					<Login update={update} setErrorMessage={setErrorMessage} />}
 			</div>
 			<p>
 				{register() ? "Already have an account?" : "Don't have an account?"}&emsp;
 				<a href="#" class={"toggle-login"} onClick={e => {
 					e.preventDefault()
-					console.log(register())
 					setRegister(!register())
-					setErrorMessage('')
 				}}>{register() ? "Login" : "Register"}</a>
 			</p>
 		</>
