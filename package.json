@@ -12,12 +12,14 @@
     "@solidjs/start": "^1.0.10",
     "better-sqlite3": "^11.5.0",
     "solid-js": "^1.9.3",
+    "sqids": "^0.3.0",
+    "two.js": "^0.8.14",
     "vinxi": "^0.4.3"
   },
   "engines": {
     "node": ">=18"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.11"
+    "@types/better-sqlite3": "^7.6.12"
   }
 }

@@ -1,3 +1,3 @@
-export default function (response: RESPONSE): response is SUCCESSRESPONSE {
+export default function <T>(response: RESPONSE<T> | CONFIRM): response is SUCCESSRESPONSE<T> | CONFIRMRESPONSE {
 	return response.success
 }

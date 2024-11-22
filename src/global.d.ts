@@ -6,7 +6,7 @@ type LoginProps = {
 }
 
 type UserSession = {
-	userId: number;
+	userId?: number;
 };
 
 type CONFIRMRESPONSE = {
@@ -30,13 +30,23 @@ type IDCount = {
 	maxId: number
 }
 
-type USERACCOUNT = {
+type PublicUSERACCOUNT = {
 	username: string
-	email: string
+	capitalize: string
+	joined: Date
+	seen_at: Date
 }
 
-type USER = {
+type PrivateUSERACCOUNT = {
+	email: string
+	verified: boolean
+} & PublicUSERACCOUNT
+
+type USERACCOUNTSTATUS = "DELETED" | "ACTIVE" | "SUSPENDED" | "PENDING"
+
+type InternalUSERACCOUNT = {
 	id: number
 	password_hash: string
 	salt: string
-} & USERACCOUNT
+	current_status: USERACCOUNTSTATUS
+} & PrivateUSERACCOUNT

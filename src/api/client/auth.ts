@@ -1,14 +1,14 @@
 import session from '../server/session'
 import { addUser, generateUserId, getUserName, verifyPassword } from "../server/db";
 
-function errorResult(err: any): ERRORRESPONSE {
+function errorResult(err: unknown): ERRORRESPONSE {
 	return {
 		success: false,
 		error: (err instanceof Error) ? err.message : (typeof err === 'string' ? err : 'Unknown error')
 	} as const
 }
 
-async function isLoggedInServer() {
+async function isLoggedInServer(): Promise<boolean> {
 	"use server"
 	try {
 		const sessionData = await session();
@@ -22,7 +22,7 @@ export async function isLoggedIn() {
 	return await isLoggedInServer()
 }
 
-async function registerServer(formData: FormData) {
+async function registerServer(formData: FormData): Promise<void> {
 	"use server"
 	const username = String(formData.get("username"));
 	const password = String(formData.get("password"));
@@ -38,18 +38,16 @@ async function registerServer(formData: FormData) {
 	}
 }
 
-export async function register(formData: FormData): Promise<RESPONSE> {
+export async function register(formData: FormData): Promise<CONFIRM> {
 	try {
 		await registerServer(formData)
-		return {
-			success: true
-		}
+		return { success: true }
 	} catch (err) {
 		return errorResult(err)
 	}
 }
 
-async function loginServer(formData: FormData) {
+async function loginServer(formData: FormData): Promise<void> {
 	"use server"
 	const username = String(formData.get("username"));
 	const password = String(formData.get("password"));
@@ -67,29 +65,28 @@ async function loginServer(formData: FormData) {
 	await sessionData.update((d: UserSession) => { d.userId = userData.id; return d })
 }
 
-export async function login(formData: FormData): Promise<RESPONSE> {
+export async function login(formData: FormData): Promise<CONFIRM> {
 	try {
 		await loginServer(formData)
-		return {
-			success: true
-		}
+		return { success: true }
 	} catch (err) {
 		return errorResult(err)
 	}
 }
 
-async function logoutServer() {
+async function logoutServer(): Promise<void> {
 	"use server"
 	const sessionData = await session()
-	await sessionData.update((d: UserSession) => { d.userId = undefined; return d })
+	await sessionData.update((d: UserSession) => {
+		d.userId = undefined;
+		return d
+	})
 }
 
-export async function logout(): Promise<RESPONSE> {
+export async function logout(): Promise<CONFIRM> {
 	try {
 		await logoutServer()
-		return {
-			success: true
-		}
+		return { success: true }
 	} catch (err) {
 		return errorResult(err)
 	}

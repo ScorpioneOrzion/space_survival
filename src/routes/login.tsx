@@ -1,7 +1,6 @@
 import { MetaProvider, Title } from "@solidjs/meta";
 import { createMemo, createSignal, Show } from "solid-js";
 import LoginRegister from "~/components/auth/component-auth"
-import '~/css/login.css'
 import { useGlobalContext } from "~/global/context";
 import { Navigate } from "@solidjs/router";
 

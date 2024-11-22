@@ -1,25 +1,73 @@
 import Database from 'better-sqlite3';
 import { randomBytes, pbkdf2Sync } from 'crypto';
 import fs from 'fs';
+import { isServer } from 'solid-js/web';
 
+const statusses = ["ACTIVE", "DELETED", "SUSPENDED", "PENDING"];
 const db = new Database(process.env.DATABASE_PATH!)
 const sql = fs.readFileSync(new URL('./db.sql', import.meta.url), 'utf-8');
 
-export function isUser(obj: any): obj is USER {
+export function toPrivate(obj: InternalUSERACCOUNT): PrivateUSERACCOUNT {
+	const { email, verified, username, capitalize, joined, seen_at } = obj
+	return { email, verified, username, capitalize, joined, seen_at }
+}
+
+export function toFakePrivate(obj: PublicUSERACCOUNT): PrivateUSERACCOUNT {
+	return { ...obj, email: " - ", verified: false };
+}
+
+export function toPublic(obj: PrivateUSERACCOUNT | InternalUSERACCOUNT): PublicUSERACCOUNT {
+	const { username, capitalize, joined, seen_at } = obj
+	return { username, capitalize, joined, seen_at }
+}
+
+export function isInternalUSERACCOUNT(obj: any): obj is InternalUSERACCOUNT {
+	return (
+		isPrivateUSERACCOUNT(obj) &&
+		'id' in obj &&
+		'password_hash' in obj &&
+		'salt' in obj &&
+		'current_status' in obj &&
+		typeof obj.id === 'number' &&
+		typeof obj.password_hash === 'string' &&
+		typeof obj.salt === 'string' &&
+		typeof obj.current_status === 'string' &&
+		statusses.includes(obj.current_status)
+	);
+}
+
+export function isPrivateUSERACCOUNT(obj: any): obj is PrivateUSERACCOUNT {
+	return (
+		isPublicUSERACCOUNT(obj) &&
+		'email' in obj &&
+		'verified' in obj &&
+		typeof obj.email === 'string' &&
+		typeof obj.verified === 'boolean'
+	)
+}
+
+export function isPublicUSERACCOUNT(obj: any): obj is PublicUSERACCOUNT {
 	return (
 		typeof obj === 'object' &&
 		obj !== null &&
-		'id' in obj &&
 		'username' in obj &&
-		'password_hash' in obj &&
-		'salt' in obj &&
-		'email' in obj &&
-		typeof obj.id === 'number' &&
+		'capitalize' in obj &&
+		'joined' in obj &&
+		'seen_at' in obj &&
 		typeof obj.username === 'string' &&
-		typeof obj.password_hash === 'string' &&
-		typeof obj.salt === 'string' &&
-		typeof obj.email === 'string'
-	);
+		typeof obj.capitalize === 'string' &&
+		obj.joined instanceof Date &&
+		obj.seen_at instanceof Date
+	)
+}
+
+export function isUserSession(obj: any): obj is Required<UserSession> {
+	return (
+		typeof obj === 'object' &&
+		obj !== null &&
+		'userId' in obj &&
+		typeof obj.userId === 'number'
+	)
 }
 
 function isId(obj: any): obj is IDCount {
@@ -47,8 +95,6 @@ sqlKeys.forEach((key, index) => {
 	let part = sqlParts[index].trim()
 	if (part !== '') sqlCommands[key] = part
 })
-
-console.log(sqlCommands)
 
 const ITERATIONS = 100000
 const KEY_LENGTH = 64;
@@ -81,12 +127,13 @@ export async function generateUserId() {
 	}
 }
 
-export function addUser(id: number, userName: string, plainPassword: string, email: string): CONFIRM {
+export function addUser(userName: string, plainPassword: string, email: string): CONFIRM {
 	const query = sqlCommands['ADD_USER'];
 	try {
+		let lowerCase = userName.toLowerCase()
 		const stmt = db.prepare(query);
 		const { salt, hash } = hashPassword(plainPassword);
-		stmt.run(id, userName, hash, salt, email);
+		stmt.run(lowerCase, userName, hash, salt, email);
 		return { success: true };
 	} catch (error) {
 		console.error('Error adding user:', error);
@@ -96,12 +143,13 @@ export function addUser(id: number, userName: string, plainPassword: string, ema
 	}
 }
 
-export function getUserName(userName: string): RESPONSE<USER> {
+export function getUserName(userName: string): RESPONSE<InternalUSERACCOUNT> {
+	if (!isServer) return { success: false, error: "INVALID ACCESS" }
 	const query = sqlCommands['GET_USER_NAME'];
 	try {
 		const stmt = db.prepare(query);
 		const user = stmt.get(userName);
-		if (isUser(user)) return { success: true, data: user };
+		if (isInternalUSERACCOUNT(user)) return { success: true, data: user };
 		return { success: false, error: 'User not found' };
 	} catch (error) {
 		console.error('Error getting user:', error);
@@ -111,12 +159,13 @@ export function getUserName(userName: string): RESPONSE<USER> {
 	}
 }
 
-export function getUserId(id: number): RESPONSE<USER> {
+export function getUserId(id: number): RESPONSE<InternalUSERACCOUNT> {
+	if (!isServer) return { success: false, error: "INVALID ACCESS" }
 	const query = sqlCommands['GET_USER_ID'];
 	try {
 		const stmt = db.prepare(query);
 		const user = stmt.get(id);
-		if (isUser(user)) return { success: true, data: user };
+		if (isInternalUSERACCOUNT(user)) return { success: true, data: user };
 		return { success: false, error: 'User not found' };
 	} catch (error) {
 		console.error('Error getting user:', error);
@@ -126,53 +175,30 @@ export function getUserId(id: number): RESPONSE<USER> {
 	}
 }
 
-export function updateUser(id: string, change: { name?: string; password?: string; email?: string }) {
-	const fields: string[] = [];
-	const values: any[] = [];
-
-	// Dynamically build the SQL query based on the fields provided
-	if (change.name) {
-		fields.push("name = ?");
-		values.push(change.name);
+export function initializeDatabase(): CONFIRM {
+	if (!isServer) {
+		return { success: false, error: "INVALID ACCESS" };
 	}
 
-	if (change.password) {
-		const { salt, hash } = hashPassword(change.password); // Regenerate salt and hash if password is updated
-		fields.push("password_hash = ?");
-		values.push(hash)
-		fields.push("salt = ?");
-		values.push(salt);
-	}
-
-	if (change.email) {
-		fields.push("email = ?");
-		values.push(change.email);
-	}
-
-	if (fields.length === 0) {
-		console.log("No fields to update");
-		return; // If there are no fields to update, return early
-	}
-
-	// Add the user ID to the end of the values array for the WHERE clause
-	values.push(id);
-
-	const query = `UPDATE users SET ${fields.join(", ")} WHERE id = ?`;
+	const query = sqlCommands['INITIALIZE'];
+	const queryINDEX = sqlCommands['INDEXING'];
 
 	try {
-		const stmt = db.prepare(query);
-		stmt.run(...values);
-		console.log("User updated successfully");
-	} catch (error) {
-		console.error("Error updating user:", error);
-	}
-}
+		// Initialize the database schema
+		db.exec(query);
 
-export function initializeDatabase() {
-	const query = sqlCommands['INITIALIZE']
-	try {
-		db.exec(query)
+		// Ensure indexes are created if they don't exist
+		db.exec(queryINDEX);
+
+		return { success: true };
 	} catch (error) {
-		console.error('Error initializing DB: ', error)
+		console.error('Error initializing DB: ', error);
+
+		// Return an appropriate error message
+		if (error instanceof Error) {
+			return { success: false, error: error.message };
+		}
+
+		return { success: false, error: "Unknown error occurred during DB initialization." };
 	}
 }
