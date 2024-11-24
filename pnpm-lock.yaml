@@ -26,9 +26,6 @@ importers:
       sqids:
         specifier: ^0.3.0
         version: 0.3.0
-      two.js:
-        specifier: ^0.8.14
-        version: 0.8.14
       vinxi:
         specifier: ^0.4.3
         version: 0.4.3(@types/node@22.9.1)(better-sqlite3@11.5.0)(ioredis@5.4.1)(terser@5.36.0)(typescript@5.6.3)
@@ -2435,9 +2432,6 @@ packages:
 
   tunnel-agent@0.6.0:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
-
-  two.js@0.8.14:
-    resolution: {integrity: sha512-l8z10ssKjrJSLbDL0Uoy4CNlML377ubIy2J1kxkAsKkE+ToiUDAvueLmDvVAngFh2fib5HtOWTr9fVIQEVw3vw==}
 
   type-fest@2.19.0:
     resolution: {integrity: sha512-RAH822pAdBgcNMAfWnCBU3CFZcfZ/i1eZjwFU/dsLKumyuuP3niueg2UAukXYF0E2AAoc82ZSSf9J0WQBinzHA==}
@@ -5051,8 +5045,6 @@ snapshots:
   tunnel-agent@0.6.0:
     dependencies:
       safe-buffer: 5.2.1
-
-  two.js@0.8.14: {}
 
   type-fest@2.19.0: {}
 
