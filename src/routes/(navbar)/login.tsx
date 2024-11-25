@@ -14,7 +14,7 @@ export default function () {
 	return (
 		<>
 			<MetaProvider>
-				<Title>Login</Title>
+				<Title>Log In</Title>
 			</MetaProvider>
 			<div class={"center"}>
 				<LoginRegister update={update} setErrorMessage={setErrorMessage} />

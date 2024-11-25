@@ -10,7 +10,8 @@ export default function (prop: RouteSectionProps) {
 		if (ready()) {
 			console.log(user())
 		}
-
+		console.log(user())
+		console.log(login())
 	})
 
 	return (
