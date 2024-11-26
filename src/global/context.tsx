@@ -3,7 +3,7 @@ import { isLoggedIn } from "~/api/client/auth";
 import { getUserInfoPrivate } from "~/api/client/user";
 
 export function emptyPrivate(): PrivateUSERACCOUNT {
-	return { email: " - ", verified: false, username: "", capitalize: "", joined: new Date(), seen_at: new Date() }
+	return { email: " - ", verified: 0, username: "", capitalize: "", joined: new Date(), seen_at: new Date() }
 }
 
 const Context = createContext<{
@@ -29,7 +29,6 @@ export default function (props: { children: JSX.Element }) {
 		try {
 			const status = await isLoggedIn();
 			login[1](status);
-			console.log(status)
 			if (status) {
 				const userStatus = await getUserInfoPrivate()
 				if (userStatus.success) {
