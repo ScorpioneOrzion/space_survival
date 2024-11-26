@@ -1,5 +1,5 @@
 import { MetaProvider, Title } from "@solidjs/meta";
-import { redirect, RouteSectionProps, useNavigate } from "@solidjs/router";
+import { RouteSectionProps, useNavigate } from "@solidjs/router";
 import { createEffect, createSignal } from "solid-js";
 import { getUserInfo } from "~/api/client/user";
 import { emptyPrivate, useGlobalContext } from "~/global/context";

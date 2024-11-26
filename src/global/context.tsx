@@ -18,7 +18,6 @@ export default function (props: { children: JSX.Element }) {
 	const ready = createSignal<boolean>(false);
 	const user = createSignal<PrivateUSERACCOUNT>(emptyPrivate());
 
-
 	function reset() {
 		ready[1](false)
 		login[1](false);
@@ -30,10 +29,13 @@ export default function (props: { children: JSX.Element }) {
 		try {
 			const status = await isLoggedIn();
 			login[1](status);
+			console.log(status)
 			if (status) {
 				const userStatus = await getUserInfoPrivate()
 				if (userStatus.success) {
 					user[1](userStatus.data)
+				} else {
+					reset()
 				}
 			}
 		} catch (error) {

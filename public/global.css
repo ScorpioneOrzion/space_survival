@@ -24,11 +24,6 @@ body {
 	margin: 0;
 }
 
-#app {
-	width: 100vw;
-	height: 100vh;
-}
-
 div.center {
 	position: relative;
 	height: 100%;
@@ -82,5 +77,25 @@ div.center {
 	p {
 		position: absolute;
 		bottom: 25vh;
+	}
+}
+
+div#buttonList {
+	display: flex;
+	flex-direction: column;
+	
+	a.button {
+		min-width: 100px;
+		width: fit-content;
+		background-color: #28a745;
+		color: #ffffff;
+		padding: 10px;
+		padding-right: 40px;
+		text-decoration: none;
+		border-radius: 5px;
+	}
+
+	a.button:hover {
+		background-color: #218838;
 	}
 }

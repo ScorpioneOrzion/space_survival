@@ -39,7 +39,7 @@ type PublicUSERACCOUNT = {
 
 type PrivateUSERACCOUNT = {
 	email: string
-	verified: boolean
+	verified: 0 | 1
 } & PublicUSERACCOUNT
 
 type USERACCOUNTSTATUS = "DELETED" | "ACTIVE" | "SUSPENDED" | "PENDING"

@@ -1,10 +1,10 @@
 import isHTMLElement from "~/helper/isHTMLElement";
 import createHTMLSignal from "~/helper/createHTMLSignal";
 import { register } from "~/api/client/auth";
-import isSuccess from "~/helper/isSuccess";
 import DisplayPassword from "../displayPassword";
+import { ParentProps } from 'solid-js';
 
-export default function ({ update, setErrorMessage }: LoginProps) {
+export default function ({ update, setErrorMessage }: ParentProps<LoginProps>) {
 	const [userNameElem, setUserNameElem] = createHTMLSignal<HTMLInputElement>();
 	const [emailElem, setEmailElem] = createHTMLSignal<HTMLInputElement>();
 	const [passWordElem, setPassWordElem] = createHTMLSignal<HTMLInputElement>();

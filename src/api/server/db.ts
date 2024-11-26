@@ -7,13 +7,18 @@ const statusses = ["ACTIVE", "DELETED", "SUSPENDED", "PENDING"];
 const db = new Database(process.env.DATABASE_PATH!)
 const sql = fs.readFileSync(new URL('./db.sql', import.meta.url), 'utf-8');
 
+function isValidDateString(dateString: string) {
+	const date = new Date(dateString);
+	return date instanceof Date && !isNaN(date.getTime());
+}
+
 export function toPrivate(obj: InternalUSERACCOUNT): PrivateUSERACCOUNT {
 	const { email, verified, username, capitalize, joined, seen_at } = obj
 	return { email, verified, username, capitalize, joined, seen_at }
 }
 
 export function toFakePrivate(obj: PublicUSERACCOUNT): PrivateUSERACCOUNT {
-	return { ...obj, email: " - ", verified: false };
+	return { ...obj, email: " - ", verified: 0 };
 }
 
 export function toPublic(obj: PrivateUSERACCOUNT | InternalUSERACCOUNT): PublicUSERACCOUNT {
@@ -21,13 +26,10 @@ export function toPublic(obj: PrivateUSERACCOUNT | InternalUSERACCOUNT): PublicU
 	return { username, capitalize, joined, seen_at }
 }
 
-export function isInternalUSERACCOUNT(obj: any): obj is InternalUSERACCOUNT {
+export function isInternalUSERACCOUNT(obj: unknown): obj is InternalUSERACCOUNT {
 	return (
 		isPrivateUSERACCOUNT(obj) &&
-		'id' in obj &&
-		'password_hash' in obj &&
-		'salt' in obj &&
-		'current_status' in obj &&
+		hasProperties(obj, ['id', 'password_hash', 'salt', 'current_status'] as const) &&
 		typeof obj.id === 'number' &&
 		typeof obj.password_hash === 'string' &&
 		typeof obj.salt === 'string' &&
@@ -36,55 +38,39 @@ export function isInternalUSERACCOUNT(obj: any): obj is InternalUSERACCOUNT {
 	);
 }
 
-export function isPrivateUSERACCOUNT(obj: any): obj is PrivateUSERACCOUNT {
+function hasProperties<T extends string>(obj: any, properties: T[]): obj is { [key in T]: unknown } {
+	return properties.every(prop => prop in obj);
+}
+
+export function isPrivateUSERACCOUNT(obj: unknown): obj is PrivateUSERACCOUNT {
 	return (
 		isPublicUSERACCOUNT(obj) &&
-		'email' in obj &&
-		'verified' in obj &&
+		hasProperties(obj, ['email', 'verified']) &&
 		typeof obj.email === 'string' &&
-		typeof obj.verified === 'boolean'
+		(obj.verified === 0 || obj.verified === 1)
 	)
 }
 
-export function isPublicUSERACCOUNT(obj: any): obj is PublicUSERACCOUNT {
+export function isPublicUSERACCOUNT(obj: unknown): obj is PublicUSERACCOUNT {
 	return (
 		typeof obj === 'object' &&
 		obj !== null &&
-		'username' in obj &&
-		'capitalize' in obj &&
-		'joined' in obj &&
-		'seen_at' in obj &&
+		hasProperties(obj, ['username', 'capitalize', 'joined', 'seen_at']) &&
 		typeof obj.username === 'string' &&
 		typeof obj.capitalize === 'string' &&
-		obj.joined instanceof Date &&
-		obj.seen_at instanceof Date
+		typeof obj.joined === 'string' &&
+		typeof obj.seen_at === 'string' &&
+		isValidDateString(obj.joined) &&
+		isValidDateString(obj.seen_at)
 	)
 }
 
-export function isUserSession(obj: any): obj is Required<UserSession> {
+export function isUserSession(obj: unknown): obj is Required<UserSession> {
 	return (
 		typeof obj === 'object' &&
 		obj !== null &&
 		'userId' in obj &&
 		typeof obj.userId === 'number'
-	)
-}
-
-function isId(obj: any): obj is IDCount {
-	return (
-		typeof obj === 'object' &&
-		obj !== null &&
-		'maxId' in obj &&
-		typeof obj.maxId === 'number'
-	)
-}
-
-function isIdEmpty(obj: any): obj is { maxId: null } {
-	return (
-		typeof obj === 'object' &&
-		obj !== null &&
-		'maxId' in obj &&
-		obj.maxId === null
 	)
 }
 
@@ -109,22 +95,6 @@ function hashPassword(password: string) {
 export function verifyPassword(password: string, salt: string, hash: string) {
 	const derivedHash = pbkdf2Sync(password, salt, ITERATIONS, KEY_LENGTH, 'sha512').toString('hex')
 	return hash === derivedHash;
-}
-
-export async function generateUserId() {
-	const query = sqlCommands['GET_MAX_ID'];
-	const stmt = db.prepare(query);
-	const result = stmt.get();
-	console.debug('Generated UserId result:', result);
-	if (isId(result)) {
-		return { success: true, id: result.maxId + 1 }
-	}
-	if (isIdEmpty(result)) {
-		return { success: true, id: 1 }
-	}
-	return {
-		success: false, id: -1
-	}
 }
 
 export function addUser(userName: string, plainPassword: string, email: string): CONFIRM {

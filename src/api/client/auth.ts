@@ -1,5 +1,5 @@
 import session from '../server/session'
-import { addUser, generateUserId, getUserName, verifyPassword } from "../server/db";
+import { addUser, getUserName, verifyPassword } from "../server/db";
 
 function errorResult(err: unknown): ERRORRESPONSE {
 	return {
@@ -28,13 +28,16 @@ async function registerServer(formData: FormData): Promise<void> {
 	const password = String(formData.get("password"));
 	const email = String(formData.get("email"));
 
+	console.log(username, password, email)
+
 	const sessionData = await session()
-	const userId = await generateUserId()
-	if (userId.success) {
-		addUser(userId.id, username, password, email)
-		await sessionData.update((d: UserSession) => { d.userId = userId.id; return d })
-	} else {
-		throw new Error("Invalid Register")
+	const result = addUser(username, password, email)
+	console.log(result)
+	if (result.success) {
+		const userData = getUserName(username)
+		if (userData.success) {
+			await sessionData.update((d: UserSession) => { d.userId = userData.data.id; return d })
+		}
 	}
 }
 
@@ -52,8 +55,10 @@ async function loginServer(formData: FormData): Promise<void> {
 	const username = String(formData.get("username"));
 	const password = String(formData.get("password"));
 
+	console.log(username, password)
 	const sessionData = await session()
 	const user = getUserName(username)
+	console.log(user)
 
 	if (!user?.success) {
 		throw new Error("Invalid login");
@@ -77,6 +82,7 @@ export async function login(formData: FormData): Promise<CONFIRM> {
 async function logoutServer(): Promise<void> {
 	"use server"
 	const sessionData = await session()
+	console.log(sessionData)
 	await sessionData.update((d: UserSession) => {
 		d.userId = undefined;
 		return d
