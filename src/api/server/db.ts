@@ -26,6 +26,10 @@ export function toPublic(obj: PrivateUSERACCOUNT | InternalUSERACCOUNT): PublicU
 	return { username, capitalize, joined, seen_at }
 }
 
+function hasProperties<T extends string>(obj: any, properties: T[]): obj is { [key in T]: unknown } {
+	return properties.every(prop => prop in obj);
+}
+
 export function isInternalUSERACCOUNT(obj: unknown): obj is InternalUSERACCOUNT {
 	return (
 		isPrivateUSERACCOUNT(obj) &&
@@ -36,10 +40,6 @@ export function isInternalUSERACCOUNT(obj: unknown): obj is InternalUSERACCOUNT 
 		typeof obj.current_status === 'string' &&
 		statusses.includes(obj.current_status)
 	);
-}
-
-function hasProperties<T extends string>(obj: any, properties: T[]): obj is { [key in T]: unknown } {
-	return properties.every(prop => prop in obj);
 }
 
 export function isPrivateUSERACCOUNT(obj: unknown): obj is PrivateUSERACCOUNT {
