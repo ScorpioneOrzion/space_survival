@@ -1,110 +1,107 @@
 import { MetaProvider, Title } from "@solidjs/meta";
 import { Navigate } from "@solidjs/router";
-import { createEffect, createSignal, Show } from "solid-js";
-import { register } from "~/api/client/auth";
-import DisplayPassword from "~/components/displayPassword";
+import type { APIEvent } from "@solidjs/start/server";
+import { createSignal, Show } from "solid-js";
+import { addUser, getUserName, toPrivate, updateUser } from "~/api/server/db";
+import session from "~/api/server/session";
 import { useGlobalContext } from "~/global/context";
-import createHTMLSignal from "~/helper/createHTMLSignal";
-import isHTMLElement from "~/helper/isHTMLElement";
 
-export default function () {
-	const [userNameElem, setUserNameElem] = createHTMLSignal<HTMLInputElement>();
-	const [emailElem, setEmailElem] = createHTMLSignal<HTMLInputElement>();
-	const [passWordElem, setPassWordElem] = createHTMLSignal<HTMLInputElement>();
-	const [passWordConfirmElem, setPassWordConfirmElem] = createHTMLSignal<HTMLInputElement>();
-	const [navigate, setNavigate] = createSignal(false)
+export async function POST(event: APIEvent) {
+	const formData = await event.request.formData();
+	const username = formData.get('username') as string;
+	const email = formData.get('email') as string;
+	const password = formData.get('password') as string;
+	const sessionData = await session()
+	const register = addUser(username, password, email)
 
-	const globalContext = useGlobalContext();
-	const { update, user, ready } = globalContext
-
-	async function handleSubmit(e: SubmitEvent) {
-		e.preventDefault()
-
-		const userNameElement = userNameElem();
-		const emailElement = emailElem();
-		const passWordElement = passWordElem();
-		const passWordConfirmElement = passWordConfirmElem();
-
-		if (
-			isHTMLElement(userNameElement) &&
-			isHTMLElement(emailElement) &&
-			isHTMLElement(passWordElement) &&
-			isHTMLElement(passWordConfirmElement)
-		) {
-			const username = userNameElement.value.trim();
-			const email = emailElement.value.trim();
-			const password = passWordElement.value.trim();
-			const confirmPassword = passWordConfirmElement.value.trim();
-
-			if (username === "" || email === "" || password === "" || confirmPassword === "") {
-				return
-			}
-
-			if (password !== confirmPassword) {
-				return
-			}
-
-			const formData = new FormData()
-			formData.append('username', username)
-			formData.append('password', password)
-			formData.append('email', email)
-
-			const response = await register(formData)
-			if (response.success) update()
-		}
+	if (!register.success) {
+		return new Response(JSON.stringify({ error: "Invalid register" }), {
+			status: 401,
+			headers: { "Content-Type": "application/json" },
+		});
 	}
 
-	createEffect(() => {
-		setNavigate(ready() && !!user().username);
+	const user = getUserName(username)
+
+	if (!user.success) {
+		return new Response(JSON.stringify({ error: "Invalid credentials" }), {
+			status: 401,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
+
+	const userData = user.data
+
+	updateUser(userData.id)
+	await sessionData.update((d: UserSession) => {
+		d.userId = userData.id;
+		return d;
 	})
+
+	const userPrivate = toPrivate(user.data)
+
+	return new Response(JSON.stringify({ success: true, user: userPrivate }), {
+		status: 200,
+		headers: { "Content-Type": "application/json" },
+	});
+}
+
+export default function () {
+	const [error, setError] = createSignal("");
+	const [location, setLocation] = createSignal("");
+
+	const globalContext = useGlobalContext();
+	const { user: [, user], login: [, login] } = globalContext
+
+	async function handleSubmit(event: SubmitEvent) {
+		event.preventDefault()
+		const formData = new FormData(event.target as HTMLFormElement)
+
+		try {
+			const response = await fetch("./createaccount", {
+				method: "POST",
+				body: formData
+			})
+
+			if (response.ok) {
+				const data = await response.json()
+				if (data.success) {
+					user(data.user)
+					login(true)
+					setLocation(data.user.username)
+				}
+			} else {
+				const errorData = await response.json()
+				setError(errorData.error);
+			}
+		} catch (err) {
+			setError("An unexpected error occurred. Please try again.");
+		}
+	}
 
 	return <>
 		<MetaProvider>
 			<Title>Create Acount</Title>
 		</MetaProvider>
-		<div class={"center"}>
-			<form onSubmit={handleSubmit} class={'auth register'}>
-				<div class={"form-group"}>
-					<label id="title">Register</label>
-					<label>Please enter details to register</label>
+		<main>
+			<form onSubmit={handleSubmit} id="form" class={"center"}>
+				<div class={"formfield"}>
+					<div id="usernameinputline">
+						<label for="username">Username:</label>
+						<input id="username" type="text" name="username" required maxlength={40} autocomplete="username" />
+					</div>
+					<div id="emailinputline">
+						<label for="email">Email:</label>
+						<input id="email" type="email" name="email" required maxLength={320} minlength={3} autocomplete="email" />
+					</div>
+					<div id="passwordinputline">
+						<label for="password">Password:</label>
+						<input id="password" type="password" name="password" required autocomplete="current-password" />
+					</div>
 				</div>
-				<div class={"form-group"}>
-					<input
-						type="text"
-						title="username"
-						ref={setUserNameElem}
-						placeholder="Username"
-						autocomplete="username"
-						required
-					/>
-				</div>
-				<div class={"form-group"}>
-					<input
-						type="email"
-						title="email"
-						ref={setEmailElem}
-						placeholder="Email"
-						autocomplete="email"
-						required
-					/>
-				</div>
-				<DisplayPassword
-					title="password"
-					ref={setPassWordElem}
-					placeholder="Password"
-					current={false}
-				/>
-				<DisplayPassword
-					title="confirm password"
-					ref={setPassWordConfirmElem}
-					placeholder="Confirm password"
-					current={false}
-				/>
-				<div class={"form-group"}>
-					<input type="submit" value={'Register'} />
-				</div>
+				<input type="submit" value={"Log In"} class={"ready"} id="submit" />
 			</form>
-		</div>
-		<Show when={navigate()}><Navigate href={`/profile/${user().username}`}></Navigate></Show>
+		</main>
+		<Show when={location() !== ""}><Navigate href={location()} /></Show>
 	</>
 }

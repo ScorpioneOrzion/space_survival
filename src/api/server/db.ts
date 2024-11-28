@@ -145,6 +145,23 @@ export function getUserId(id: number): RESPONSE<InternalUSERACCOUNT> {
 	}
 }
 
+export function updateUser(id: number): CONFIRM {
+	if (!isServer) return { success: false, error: "INVALID ACCESS" }
+
+	const query = sqlCommands['UPDATE_SEEN_AT'];
+
+	try {
+		const stmt = db.prepare(query)
+		stmt.run(id);
+		return { success: true };
+	} catch (error) {
+		console.error('Error getting user:', error);
+		if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string')
+			return { success: false, error: error.message };
+		return { success: false, error: "Unknown error" }
+	}
+}
+
 export function initializeDatabase(): CONFIRM {
 	if (!isServer) {
 		return { success: false, error: "INVALID ACCESS" };

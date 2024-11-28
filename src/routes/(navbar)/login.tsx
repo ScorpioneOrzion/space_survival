@@ -1,85 +1,102 @@
 import { MetaProvider, Title } from "@solidjs/meta";
 import { Navigate } from "@solidjs/router";
-import { createEffect, createSignal, Show } from "solid-js";
-import { login } from "~/api/client/auth";
-import DisplayPassword from "~/components/displayPassword";
+import type { APIEvent } from "@solidjs/start/server";
+import { createSignal, Show } from "solid-js";
+import { getUserName, toPrivate, updateUser, verifyPassword } from "~/api/server/db";
+import session from "~/api/server/session";
 import { useGlobalContext } from "~/global/context";
-import createHTMLSignal from "~/helper/createHTMLSignal";
-import isHTMLElement from "~/helper/isHTMLElement";
 
-export default function () {
-	const [userNameElem, setUserNameElem] = createHTMLSignal<HTMLInputElement>();
-	const [passWordElem, setPassWordElem] = createHTMLSignal<HTMLInputElement>();
-	const [navigate, setNavigate] = createSignal(false)
+export async function POST(event: APIEvent) {
+	const formData = await event.request.formData();
+	const username = formData.get('username') as string;
+	const password = formData.get('password') as string;
+	const sessionData = await session()
+	const user = getUserName(username)
 
-	const globalContext = useGlobalContext();
-	const { update, user, ready } = globalContext
-
-	async function handleSubmit(e: SubmitEvent) {
-		e.preventDefault()
-
-		const userNameElement = userNameElem();
-		const passWordElement = passWordElem();
-
-		if (
-			isHTMLElement(userNameElement) &&
-			isHTMLElement(passWordElement)
-		) {
-			const username = userNameElement.value.trim();
-			const password = passWordElement.value.trim();
-
-			if (username === "" || password === "") {
-				return
-			}
-			
-			const formData = new FormData();
-			formData.append('username', username);
-			formData.append('password', password);
-
-			const response = await login(formData)
-			if (response.success) {
-				update()
-			}
-		}
+	if (!user.success) {
+		return new Response(JSON.stringify({ error: "Invalid credentials" }), {
+			status: 401,
+			headers: { "Content-Type": "application/json" },
+		});
 	}
 
-	createEffect(() => {
-		setNavigate(ready() && !!user().username);
+	const userData = user.data
+
+	if (!userData || !verifyPassword(password, userData.salt, userData.password_hash)) {
+		return new Response(JSON.stringify({ error: "Invalid credentials" }), {
+			status: 401,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
+
+	updateUser(userData.id)
+	await sessionData.update((d: UserSession) => {
+		d.userId = userData.id;
+		return d;
 	})
+
+	const userPrivate = toPrivate(user.data)
+
+	return new Response(JSON.stringify({ success: true, user: userPrivate }), {
+		status: 200,
+		headers: { "Content-Type": "application/json" },
+	});
+}
+
+export default function () {
+	const [error, setError] = createSignal("");
+	const [location, setLocation] = createSignal("");
+
+	const globalContext = useGlobalContext();
+	const { user: [, user], login: [, login] } = globalContext
+
+	async function handleSubmit(event: SubmitEvent) {
+		event.preventDefault()
+		const formData = new FormData(event.target as HTMLFormElement)
+
+		try {
+			const response = await fetch("./login", {
+				method: "POST",
+				body: formData
+			})
+
+			if (response.ok) {
+				const data = await response.json()
+				if (data.success) {
+					user(data.user)
+					login(true)
+					setLocation(`/profile/${data.user.username}`)
+				}
+			} else {
+				const errorData = await response.json()
+				setError(errorData.error);
+			}
+		} catch (err) {
+			setError("An unexpected error occurred. Please try again.");
+		}
+	}
 
 	return (
 		<>
 			<MetaProvider>
 				<Title>Log In</Title>
 			</MetaProvider>
-			<div class={"center"}>
-				<form onSubmit={handleSubmit} class={'auth login'}>
-					<div class={"form-group"}>
-						<label id="title">Login</label>
-						<label>Please login to your account</label>
+			<main>
+				<form onSubmit={handleSubmit} id="form" class={"center"}>
+					<div class={"formfield"}>
+						<div id="usernameinputline">
+							<label for="username">Username:</label>
+							<input id="username" type="text" name="username" required maxlength={40} autocomplete="username" />
+						</div>
+						<div id="passwordinputline">
+							<label for="password">Password:</label>
+							<input id="password" type="password" name="password" required autocomplete="current-password" />
+						</div>
 					</div>
-					<div class={"form-group"}>
-						<input
-							type="text"
-							title="username"
-							ref={setUserNameElem}
-							placeholder="Username"
-							autocomplete="username"
-							required
-						/>
-					</div>
-					<DisplayPassword
-						ref={setPassWordElem}
-						current={true}
-						title="password"
-						placeholder="Password"
-					/>
-					<div class={"form-group"}>
-						<input type="submit" value={'Log In'} />
-					</div>
+					<input type="submit" value={"Log In"} class={"ready"} id="submit" />
 				</form>
-			</div>
-			<Show when={navigate()}><Navigate href={`/profile/${user().username}`}></Navigate></Show>
+			</main>
+			<Show when={location() !== ""}><Navigate href={location()} /></Show>
 		</>
 	)
 }

@@ -4,24 +4,29 @@ import { A, RouteSectionProps } from "@solidjs/router";
 
 export default function (prop: RouteSectionProps) {
 	const globalContext = useGlobalContext();
-	const { login, ready, user } = globalContext
+	const { login: [login], ready, user: [user] } = globalContext
 
 	return (
 		<Show when={ready()}>
 			<header>
-				<A title="play" href="/play">Play</A>
-				<A title="news" href="/news">News</A>
-				{login() ? (
-					<>
-						<A title="profile" href={`/profile/${user().username}`}>Profile</A>
-						<A title="logout" href="/logout">Logout</A>
-					</>
-				) : (
-					<>
-						<A title="login" href="/login">Login</A>
-						<A title="createaccount" href="/createaccount">Create Account</A>
-					</>
-				)}
+				<div class={"hidden"}></div>
+				<div></div>
+				<nav>
+					<A href="/play">Play</A>
+					<A href="/news">News</A>
+					{login() ? (
+						<>
+							<A href={`/profile/${user().username}`}>Profile</A>
+							<A href="/logout">Logout</A>
+						</>
+					) : (
+						<>
+							<A href="/login">Login</A>
+							<A href="/createaccount">Create Account</A>
+						</>
+					)}
+				</nav>
+				<div></div>
 			</header>
 			{prop.children}
 		</Show>

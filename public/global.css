@@ -1,89 +1,65 @@
-div.topbar {
-	z-index: 1;
-	position: absolute;
-	width: 100vw;
-	height: 50px;
+header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	height: 40px;
+	border-bottom: 1px solid black;
+	font-size: 16px;
+	position: fixed;
 	top: 0;
 	left: 0;
-	background-color: #031086;
+	right: 0;
 
-	div.account {
-		position: absolute;
-		right: 0;
-		height: 100%;
-		width: 150px;
-
-		button {
-			width: 100%;
-			height: 100%;
-		}
-	}
-}
-
-body {
-	margin: 0;
-}
-
-div.center {
-	position: relative;
-	height: 100%;
-	width: 100%;
-	font-size: 1rem;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-
-	div#forum {
-		flex-direction: column;
+	nav {
 		display: flex;
-	}
-
-	div.errorMessage {
-		position: absolute;
-		bottom: 20vh;
-
-		&>p {
-			position: relative;
-			bottom: 0;
-		}
-	}
-
-	form {
-
-		gap: 10px;
-
-		div.form-group:has(label) {
-			flex-direction: column;
-
-			label#title {
-				font-size: 1.5em;
-				font-weight: bold;
-			}
-
-			margin-bottom: 20px;
-		}
-
-		div.form-group {
-			width: 225px;
+		flex-direction: row;
+		gap: 2px;
+		a {
+			padding: 0 16px 0;
+			white-space: nowrap;
+			overflow: hidden;
+			align-items: center;
+			text-decoration: none;
 			display: flex;
 
-			input {
-				width: 225px;
-				height: 25px;
+			&.active {
+				background-color: #e6e6e6;
+			}
+
+			&.inactive {
+				background-color: #00000019;
+
+			}
+			&:hover {
+				background-color: #ededed;
 			}
 		}
 	}
+}
 
-	p {
-		position: absolute;
-		bottom: 25vh;
-	}
+main {
+	top: 40px;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	position: fixed;
+}
+
+.hidden {
+	display: none;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 div#buttonList {
 	display: flex;
 	flex-direction: column;
-	
+
 	a.button {
 		min-width: 100px;
 		width: fit-content;

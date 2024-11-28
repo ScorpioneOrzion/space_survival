@@ -33,8 +33,8 @@ type IDCount = {
 type PublicUSERACCOUNT = {
 	username: string
 	capitalize: string
-	joined: Date
-	seen_at: Date
+	joined: string
+	seen_at: string
 }
 
 type PrivateUSERACCOUNT = {

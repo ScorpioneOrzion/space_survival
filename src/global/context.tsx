@@ -1,30 +1,39 @@
-import { createContext, createEffect, createSignal, JSX, useContext } from "solid-js";
-import { isLoggedIn } from "~/api/client/auth";
+import { createContext, createEffect, createSignal, ParentProps, useContext } from "solid-js";
 import { getUserInfoPrivate } from "~/api/client/user";
+import session from "~/api/server/session";
 
 export function emptyPrivate(): PrivateUSERACCOUNT {
-	return { email: " - ", verified: 0, username: "", capitalize: "", joined: new Date(), seen_at: new Date() }
+	return { email: " - ", verified: 0, username: "", capitalize: "", joined: " - ", seen_at: " - " }
+}
+
+async function isLoggedIn(): Promise<boolean> {
+	"use server"
+	try {
+		const sessionData = await session();
+		return typeof sessionData.data.userId === 'number';
+	} catch (error) {
+		return false;
+	}
 }
 
 const Context = createContext<{
-	login: () => boolean
+	login: ReturnType<typeof createSignal<boolean>>
+	user: ReturnType<typeof createSignal<PrivateUSERACCOUNT>>
 	ready: () => boolean
-	user: () => PrivateUSERACCOUNT
-	update: () => void
 }>()
 
-export default function (props: { children: JSX.Element }) {
+export default function (props: ParentProps) {
 	const login = createSignal<boolean>(false);
 	const ready = createSignal<boolean>(false);
 	const user = createSignal<PrivateUSERACCOUNT>(emptyPrivate());
 
 	function reset() {
-		ready[1](false)
 		login[1](false);
 		user[1](emptyPrivate())
 	}
 
 	async function update() {
+		ready[1](false)
 		reset()
 		try {
 			const status = await isLoggedIn();
@@ -47,7 +56,7 @@ export default function (props: { children: JSX.Element }) {
 	createEffect(() => { update() }, [])
 
 	return (
-		<Context.Provider value={{ login: login[0], ready: ready[0], user: user[0], update }}>
+		<Context.Provider value={{ login, ready: ready[0], user }}>
 			{props.children}
 		</Context.Provider>
 	)
