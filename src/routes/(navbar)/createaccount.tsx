@@ -1,50 +1,7 @@
 import { MetaProvider, Title } from "@solidjs/meta";
 import { Navigate } from "@solidjs/router";
-import type { APIEvent } from "@solidjs/start/server";
 import { createSignal, Show } from "solid-js";
-import { addUser, getUserName, toPrivate, updateUser } from "~/api/server/db";
-import session from "~/api/server/session";
 import { useGlobalContext } from "~/global/context";
-
-export async function POST(event: APIEvent) {
-	const formData = await event.request.formData();
-	const username = formData.get('username') as string;
-	const email = formData.get('email') as string;
-	const password = formData.get('password') as string;
-	const sessionData = await session()
-	const register = addUser(username, password, email)
-
-	if (!register.success) {
-		return new Response(JSON.stringify({ error: "Invalid register" }), {
-			status: 401,
-			headers: { "Content-Type": "application/json" },
-		});
-	}
-
-	const user = getUserName(username)
-
-	if (!user.success) {
-		return new Response(JSON.stringify({ error: "Invalid credentials" }), {
-			status: 401,
-			headers: { "Content-Type": "application/json" },
-		});
-	}
-
-	const userData = user.data
-
-	updateUser(userData.id)
-	await sessionData.update((d: UserSession) => {
-		d.userId = userData.id;
-		return d;
-	})
-
-	const userPrivate = toPrivate(user.data)
-
-	return new Response(JSON.stringify({ success: true, user: userPrivate }), {
-		status: 200,
-		headers: { "Content-Type": "application/json" },
-	});
-}
 
 export default function () {
 	const [error, setError] = createSignal("");
@@ -58,7 +15,7 @@ export default function () {
 		const formData = new FormData(event.target as HTMLFormElement)
 
 		try {
-			const response = await fetch("./createaccount", {
+			const response = await fetch("/api/createaccount", {
 				method: "POST",
 				body: formData
 			})

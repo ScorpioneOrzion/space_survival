@@ -1,19 +1,7 @@
 import { createContext, createEffect, createSignal, ParentProps, useContext } from "solid-js";
-import { getUserInfoPrivate } from "~/api/client/user";
-import session from "~/api/server/session";
 
 export function emptyPrivate(): PrivateUSERACCOUNT {
 	return { email: " - ", verified: 0, username: "", capitalize: "", joined: " - ", seen_at: " - " }
-}
-
-async function isLoggedIn(): Promise<boolean> {
-	"use server"
-	try {
-		const sessionData = await session();
-		return typeof sessionData.data.userId === 'number';
-	} catch (error) {
-		return false;
-	}
 }
 
 const Context = createContext<{
@@ -35,21 +23,42 @@ export default function (props: ParentProps) {
 	async function update() {
 		ready[1](false)
 		reset()
-		try {
-			const status = await isLoggedIn();
-			login[1](status);
-			if (status) {
-				const userStatus = await getUserInfoPrivate()
-				if (userStatus.success) {
-					user[1](userStatus.data)
-				} else {
-					reset()
-				}
+
+		const userResponse = await fetch("/api/getUser", {
+			method: "GET"
+		})
+
+		if (userResponse.ok) {
+			const userData = await userResponse.json();
+			const status = userData.userId !== undefined
+
+			if (!status) {
+				ready[1](true)
+				return
 			}
-		} catch (error) {
-			console.error("Error checking login status:", error);
-			reset()
+
+			login[1](true);
+
+			const userNameRequest = new FormData();
+			userNameRequest.append("userId", userData.userId.toString());
+
+			const userNameResponse = await fetch("/api/request", {
+				method: "POST",
+				body: userNameRequest,
+			});
+
+			if (userNameResponse.ok) {
+				const userNameData = await userNameResponse.json(); // Avoid redeclaration
+				user[1](userNameData.user);
+			} else {
+				console.error("Failed to fetch user name data");
+				reset();
+			}
+		} else {
+			console.error("Failed to fetch user data");
+			reset();
 		}
+
 		ready[1](true)
 	}
 
