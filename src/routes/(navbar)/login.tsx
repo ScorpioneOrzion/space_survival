@@ -25,7 +25,7 @@ export default function () {
 				if (data.success) {
 					user(data.user)
 					login(true)
-					setLocation(`/profile/${data.user.username}`)
+					setLocation(`/members/${data.user.username}`)
 				}
 			} else {
 				const errorData = await response.json()

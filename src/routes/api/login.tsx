@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { getUserName, toPrivate, updateUser, verifyPassword } from "~/api/server/db";
+import { getUserName, toPrivate, updateUser, verifyPassword } from "~/api/server/userDb";
 import session from "~/api/server/session";
 
 export async function POST(event: APIEvent) {

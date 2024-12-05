@@ -1,5 +1,5 @@
 import { A, useParams } from "@solidjs/router";
-import { Accessor, For, ParentProps, Show } from "solid-js";
+import { For, ParentProps, Show } from "solid-js";
 
 type FolderComponent = {
 	paths: string[]

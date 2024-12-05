@@ -1,4 +1,5 @@
-import { createContext, createEffect, createSignal, ParentProps, useContext } from "solid-js";
+import { MetaProvider, Title } from "@solidjs/meta";
+import { createContext, createEffect, createSignal, onCleanup, ParentProps, Show, useContext } from "solid-js";
 
 export function emptyPrivate(): PrivateUSERACCOUNT {
 	return { email: " - ", verified: 0, username: "", capitalize: "", joined: " - ", seen_at: " - " }
@@ -65,9 +66,11 @@ export default function (props: ParentProps) {
 	createEffect(() => { update() }, [])
 
 	return (
-		<Context.Provider value={{ login, ready: ready[0], user }}>
-			{props.children}
-		</Context.Provider>
+		<>
+			<Context.Provider value={{ login, ready: ready[0], user }}>
+				{props.children}
+			</Context.Provider>
+		</>
 	)
 }
 

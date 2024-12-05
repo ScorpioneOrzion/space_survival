@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { getUserId, toPrivate } from "~/api/server/db";
+import { getUserId, toPrivate } from "~/api/server/userDb";
 export async function POST(event: APIEvent) {
 	const formData = await event.request.formData();
 	const userID = formData.get("userId") as string;

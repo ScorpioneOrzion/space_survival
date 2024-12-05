@@ -3,9 +3,9 @@ import { randomBytes, pbkdf2Sync } from 'crypto';
 import fs from 'fs';
 import { isServer } from 'solid-js/web';
 
-const statusses = ["ACTIVE", "DELETED", "SUSPENDED", "PENDING"];
+const statusses = ["ACTIVE", "DELETED", "SUSPENDED"];
 const db = new Database(process.env.DATABASE_PATH!)
-const sql = fs.readFileSync(new URL('./db.sql', import.meta.url), 'utf-8');
+const sql = fs.readFileSync(new URL('./userDb.sql', import.meta.url), 'utf-8');
 
 function isValidDateString(dateString: string) {
 	const date = new Date(dateString);
@@ -95,6 +95,21 @@ function hashPassword(password: string) {
 export function verifyPassword(password: string, salt: string, hash: string) {
 	const derivedHash = pbkdf2Sync(password, salt, ITERATIONS, KEY_LENGTH, 'sha512').toString('hex')
 	return hash === derivedHash;
+}
+
+export function getAllUsers(): RESPONSE<PublicUSERACCOUNT[]> {
+	const query = sqlCommands['GET_ALL_USERS'];
+	try {
+		const stmt = db.prepare(query);
+		const users = stmt.all()
+		if (users.every(isInternalUSERACCOUNT)) return { success: true, data: users.map(toPublic) }
+		return { success: false, error: "Invalid Data" }
+	} catch (error) {
+		console.error('Error adding user:', error);
+		if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string')
+			return { success: false, error: error.message };
+		return { success: false, error: "Unknown error" }
+	}
 }
 
 export function addUser(userName: string, plainPassword: string, email: string): CONFIRM {

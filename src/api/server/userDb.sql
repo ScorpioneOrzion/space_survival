@@ -13,6 +13,9 @@ CREATE TABLE IF NOT EXISTS users (
 );
 -- INDEXING
 CREATE INDEX IF NOT EXISTS idx_username ON users (username);
+-- GET_ALL_USERS
+SELECT *
+FROM users;
 -- ADD_USER
 INSERT INTO users (username, capitalize, password_hash, salt, email)
 VALUES (?, ?, ?, ?, ?);
